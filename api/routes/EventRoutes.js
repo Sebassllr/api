@@ -4,6 +4,7 @@ const rol = require('../controllers/EventController');
 const router = express.Router();
 
 router.get('/evento/', rol.findAll);
+router.get('/propuesta/', rol.findAllProps);
 router.post('/evento/', rol.create);
 router.post('/evento/Vote', rol.updateVote);
 router.post('/evento/FinalVote', rol.closeEvent);

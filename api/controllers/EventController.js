@@ -20,6 +20,11 @@ exports.findAll = (req, res) => {
     eventService.findAllEvents().then(array => utils.show(res, '', array));
 }
 
+exports.findAllProps = (req, res) => {
+    console.log("Se procede a encontrar todas las propuestas");
+    eventService.findAllEventsProps().then(array => utils.show(res, '', array));
+}
+
 /**
  * Crea un evento
  */

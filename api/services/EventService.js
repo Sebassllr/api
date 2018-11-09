@@ -26,6 +26,14 @@ exports.findAllEvents = () =>{
 }
 
 /**
+ * Encuentra todos los eventos que ya han sido cerrados por fecha de votación
+ */
+exports.findAllEventsProps = () =>{
+    return eventDao.findAllEvents().then(events => events);
+}
+
+
+/**
  * Actualiza los eventos cuya fecha de finalización ha sido superada
  */
 exports.updateEvents = (events, res) => {
