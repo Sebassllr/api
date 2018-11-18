@@ -5,33 +5,23 @@ const voteDao = require('../dao/VoteDAO')
 /**
  * Encargado de guardar un evento
  */
-exports.saveEvent = (newEvent, res) =>{
-    const event = eventDao.saveEvent(newEvent, res);
-    event.then(event => {
-        const newVote = vote(event.newEvent._id, newEvent);
-        return newVote;
-    }).then(newVote => {
-        const vote = voteDao.saveVote(newVote);
-        console.log("acá")
-        console.log(vote)
-        return vote;
-    });
+exports.saveEvent = (newEvent, res) => {
+    return eventDao.saveEvent(newEvent, res);
 }
 
 /**
  * Encuentra todos los eventos que ya han sido cerrados por fecha de votación
  */
-exports.findAllEvents = () =>{
+exports.findAllEvents = () => {
     return fullEventDao.getAllFullEvents().then(events => events);
 }
 
 /**
  * Encuentra todos los eventos que ya han sido cerrados por fecha de votación
  */
-exports.findAllEventsProps = () =>{
+exports.findAllEventsProps = () => {
     return eventDao.findAllEvents().then(events => events);
 }
-
 
 /**
  * Actualiza los eventos cuya fecha de finalización ha sido superada
@@ -53,29 +43,53 @@ exports.updateEvent = (event, res) => {
     voteDao.findVoteByEventId(event._id, res).then(vote => getMaxVotes(vote, event, res));
 }
 
+exports.findAllEventsByCategory = (category, res) => {
+
+    eventDao.findAllEvents().then(events => {
+        const chars = events.map(event => {
+            const ev = event.characteristics.filter(characteristic => characteristic.category === category);
+            if(ev != null){
+                return ev;
+            }
+        })
+        res.send(chars);
+    });
+}
+
 /**
  * Obtiene el máximo de votos por cada categoría
  */
 getMaxVotes = (vote, event, res) => {
-    const finalVote = {};
+    const characteristics = event.characteristics;
 
-    const dateArray = [vote["date1"], vote["date2"], vote["date3"]];
-    const eventDateArray = [event["date1"], event["date2"], event["date3"]];
-    const date = getMaxNumber(dateArray);
-    finalVote.date = eventDateArray[date];
+    let counts = {};
+    let places = [];
+    let finalDate = [];
+    let finalHour = [];
+    let rules = [];
 
-    const timeArray = [vote["time1"], vote["time2"], vote["time3"]];
-    const eventTimeArray = [event["time1"], event["time2"], event["time3"]];
-    const time = getMaxNumber(timeArray);
-    finalVote.time = eventTimeArray[time];
+    characteristics.forEach(x  => {
+        
+    });
+    // const finalVote = {};
 
-    const placeArray = [vote["place1"], vote["place2"], vote["place3"]];
-    const eventPlaceArray = [event["place1"], event["place2"], event["place3"]];
-    const place = getMaxNumber(placeArray);
-    finalVote.place = eventPlaceArray[place];
+    // const dateArray = [vote["date1"], vote["date2"], vote["date3"]];
+    // const eventDateArray = [event["date1"], event["date2"], event["date3"]];
+    // const date = getMaxNumber(dateArray);
+    // finalVote.date = eventDateArray[date];
 
-    finalVote.name = event.name;
-    finalVote.description = event.description;
+    // const timeArray = [vote["time1"], vote["time2"], vote["time3"]];
+    // const eventTimeArray = [event["time1"], event["time2"], event["time3"]];
+    // const time = getMaxNumber(timeArray);
+    // finalVote.time = eventTimeArray[time];
+
+    // const placeArray = [vote["place1"], vote["place2"], vote["place3"]];
+    // const eventPlaceArray = [event["place1"], event["place2"], event["place3"]];
+    // const place = getMaxNumber(placeArray);
+    // finalVote.place = eventPlaceArray[place];
+
+    // finalVote.name = event.name;
+    // finalVote.description = event.description;
     return saveFinalEvent(finalVote, res);
 }
 

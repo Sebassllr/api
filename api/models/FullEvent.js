@@ -5,9 +5,8 @@ const FullEvent = new Schema(
   {
     name: {type: String, required: true},
     description: {type: String, required: true},
-    date: {type: String, required: true},
-    time: {type: String, required: true},
-    place: {type: String, required: true}
+    characteristics: {type: Array, required: true},
+    calification: {type: Array, required: true},
   },
   { collection: 'sh_finalEvent' },
 )

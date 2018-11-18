@@ -25,12 +25,20 @@ exports.findAllProps = (req, res) => {
     eventService.findAllEventsProps().then(array => utils.show(res, '', array));
 }
 
+exports.findByCategory = (req, res) => {
+    const params = req.query.category;
+    console.log(params);
+    eventService.findAllEventsByCategory(params, res);
+}
+
 /**
  * Crea un evento
  */
 exports.create = (req, res) => {
     const event = req.body;
-    eventService.saveEvent(event, res);
+    eventService.saveEvent(event, res).then(event => {
+        res.send("El evento se ha guardado correctamente");
+    });
 }
 
 /**
@@ -50,9 +58,3 @@ exports.updateVote = (req, res) => {
     console.log("Se procede a actualizar la votación");
     eventService.getVote(vote, res);
 }
-
-
-
-
-
-

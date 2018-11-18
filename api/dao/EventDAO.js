@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
 const EventP = mongoose.model('Event')
-const utils = require('../handlers/utils')
 
 /**
  * Encuentra todos los eventos propuestos
@@ -26,11 +25,10 @@ exports.saveEvent = (event, res) => {
         toSaveEvent.save((err, toSaveEvent) => {
             if(!err){
                 console.log("El evento se ha guardado evento correctamente");
-                resolve({id: toSaveEvent.id, event: event, err: err, res: res, newEvent: toSaveEvent}); 
+                resolve(toSaveEvent); 
             }else{
                 reject("No se pudo completar")
             }
         })
     });
 }
-
