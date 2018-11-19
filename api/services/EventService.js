@@ -26,71 +26,174 @@ exports.findAllEventsProps = () => {
 /**
  * Actualiza los eventos cuya fecha de finalización ha sido superada
  */
-exports.updateEvents = (events, res) => {
-    const date = new Date();
-    return events.map(e => {
-            const finishDate = new Date(e.closeVot);
-            if(finishDate < date){
-                updateEvent(e, res);
+exports.updateEvents = events => {
+    const promise = new Promise((resolve, reject) => {
+        const oldEvents = events.filter(event => {
+            const date = new Date(event.closeVot);
+            const today = new Date();
+            return date <= today;
+        })
+        console.log(events);
+        oldEvents.forEach(event => {
+            getMaxVotes(event).then(fullevent => {
+                fullEventDao.saveFullEvent(fullEvent).then(event => {
+                    if(event){
+                        resolve(event)
+                    }else{
+                        reject(false);
+                    }
+                    
+                });
+            })
+        })
+    });
+    return promise;
+}
+
+exports.findEventById = eventId => {
+    return new Promise((resolve, reject) => {
+        eventDao.findEventById(eventId).then(event => {
+            if(event){
+                resolve(event);
+            }else{
+                reject(event);
             }
-        });
+        })
+    })
 }
 
 /**
  * Actualiza un evento por su ID
  */
-exports.updateEvent = (event, res) => {
-    voteDao.findVoteByEventId(event._id, res).then(vote => getMaxVotes(vote, event, res));
+exports.updateEvent = (event) => {
+    eventDao.updateEvent(event._id, event);
 }
 
 exports.findAllEventsByCategory = (category, res) => {
+    return new Promise((resolve, reject) => {
+        eventDao.findAllEvents().then(events => {
 
-    eventDao.findAllEvents().then(events => {
-        const chars = events.map(event => {
-            const ev = event.characteristics.filter(characteristic => characteristic.category === category);
-            if(ev != null){
-                return ev;
+            const chars = findAllCharacteristics(events, category);
+
+            if(chars.length > 0){
+                resolve(chars)    
+            }else{
+                reject(null);
             }
         })
-        res.send(chars);
     });
+}
+
+findAllCharacteristics = (events, category) => {
+    return events.map(event => {
+        const ev = event.characteristics.filter(characteristic => characteristic.category === category);
+        if(ev != null && ev.length >= 0){
+            return ev;
+        }
+    });
+}
+
+exports.findCategoryByEventId = params => {
+    return new Promise((resolve, reject) => {
+        eventDao.findEventById(params.id).then(event => {
+            const chars = event.characteristics.filter( char => char.category === params.category);
+            if(chars !=  null){
+                resolve(chars);
+            }else{
+                reject(null);
+            }
+        });
+    });
+}
+
+getMaximunValues = array => {
+    const maxItem = {
+        votes: 0
+    };
+    
+    for (let index = 0; index < array.length; index++) {
+        const item = array[index];
+        
+        if(item.votes >= maxItem.votes || maxItem.votes === 0){
+            maxItem.votes = item.votes;
+            maxItem.id = item.id;
+            maxItem.value = item.value;
+            maxItem.category = item.category;
+        }
+    }
+    return maxItem;
+}
+
+getRules = array => {
+    return array.filter(item => item.votes > 0);
+}
+
+exports.addCharacteristicsToEvent = updatedEvent => {
+    return new Promise((resolve, reject) => {
+        eventDao.updateEvent(updatedEvent._id, updatedEvent).then(event => {
+            if(event){
+                resolve(event);
+            }else{
+                reject(event);
+            }
+        })
+    })
 }
 
 /**
  * Obtiene el máximo de votos por cada categoría
  */
-getMaxVotes = (vote, event, res) => {
-    const characteristics = event.characteristics;
+exports.getMaxVotes = event => {
 
-    let counts = {};
-    let places = [];
-    let finalDate = [];
-    let finalHour = [];
-    let rules = [];
+    const promise = new Promise((resolve, reject) => {
+        const fullEvent = {};
+        const characteristic = [];
+        fullEvent.name = event.name;
+        fullEvent.description = event.description;
+        const obj = {};
+        obj.id = event._id;
+        obj.category = 'Lugar';
+        this.findCategoryByEventId(obj).then(places => {
+            const place = getMaximunValues(places);
+            if(place){
+                characteristic.push(place);
+            }
+            obj.category = 'Hora del evento';
+            return this.findCategoryByEventId(obj);
+        }).then(times => {
+            const time = getMaximunValues(times);
+            if(time){
+                characteristic.push(time);
+            }
+            obj.category = 'Fecha del evento';
+            return this.findCategoryByEventId(obj);
+        }).then(dates => {
+            const date = getMaximunValues(dates);
+            if(date){
+                characteristic.push(date);
+            }
+            obj.category = 'Regla';
+            return this.findCategoryByEventId(obj);
+        }).then(rules => {
+            const rule = getRules(rules);
+            if(rule.length > 0){
+                characteristic.push({rules: rule});
+            }
+            fullEvent.characteristics = characteristic;
+            return fullEventDao.saveFullEvent(fullEvent);
+        }).then(finalEvent => {
+            event.state = false;
+            return eventDao.updateEvent(event._id, event)
+        }).then(event => {
+            if(event){
+                resolve(fullEvent);
+            }else{
+                reject(false);
+            }
+        }).catch(err => console.log(err));
+    })
 
-    characteristics.forEach(x  => {
-        
-    });
-    // const finalVote = {};
-
-    // const dateArray = [vote["date1"], vote["date2"], vote["date3"]];
-    // const eventDateArray = [event["date1"], event["date2"], event["date3"]];
-    // const date = getMaxNumber(dateArray);
-    // finalVote.date = eventDateArray[date];
-
-    // const timeArray = [vote["time1"], vote["time2"], vote["time3"]];
-    // const eventTimeArray = [event["time1"], event["time2"], event["time3"]];
-    // const time = getMaxNumber(timeArray);
-    // finalVote.time = eventTimeArray[time];
-
-    // const placeArray = [vote["place1"], vote["place2"], vote["place3"]];
-    // const eventPlaceArray = [event["place1"], event["place2"], event["place3"]];
-    // const place = getMaxNumber(placeArray);
-    // finalVote.place = eventPlaceArray[place];
-
-    // finalVote.name = event.name;
-    // finalVote.description = event.description;
-    return saveFinalEvent(finalVote, res);
+    return promise;
 }
 
 /**
@@ -123,9 +226,17 @@ getMaxNumber = arr => {
 /**
  * Obtiene un voto por el ID
  */
-exports.getVote = (obj, res) => {
-    voteDao.findVoteByEventId(obj.id).then( vote => updateVotation(vote, obj, res))
-    .catch(except => console.log(except));    
+exports.vote = obj => {
+    return new Promise((resolve, reject) => {
+        eventDao.updateEvent(obj._id, obj).then(obj => {
+            console.log(obj);
+            if(obj){
+                resolve(obj);
+            }else{
+                reject(obj);
+            } 
+        });
+    });
 }
 
 /**

@@ -5,16 +5,15 @@ const utils = require('../handlers/utils')
 /**
  * Guarda un evento
  */
-exports.saveFullEvent = (event, res) =>{
+exports.saveFullEvent = event =>{
     const toSaveEvent = new FullEvent({...event});
     return new Promise((resolve, reject) =>{
         toSaveEvent.save((err, toSaveEvent) => {
             console.log("El evento se ha creado correctamente");
-            if(res && !err){
-                utils.show(res, err, toSaveEvent)
+            if(!err){
                 resolve(toSaveEvent);
             }else{
-                reject("Hubo un guardando el evento")
+                reject(false);
             }
         });
     })
@@ -26,6 +25,7 @@ exports.saveFullEvent = (event, res) =>{
 exports.getAllFullEvents = () => {
     return new Promise((resolve, reject) => {
         FullEvent.find({}).exec((err, evento) => {
+            console.log(evento);
             if(!err){
                 resolve(evento)
             }else{

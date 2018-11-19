@@ -22,8 +22,9 @@ exports.saveVote = vote => {
     const toSaveVotation = new Vote({...vote});
     return new Promise((resolve, reject) => {
         toSaveVotation.save((err, toSaveVotation) => {
+            console.log(err);
             console.log("La votación se ha guardado evento correctamente");
-            !err ? resolve(toSaveVotation): reject("Hubo un error guardando el objeto");
+            !err ? resolve(toSaveVotation): reject(err);
         })
     });
 }
@@ -37,7 +38,6 @@ exports.findIdAndUpdateVote = (id, vote, res) => {
     return new Promise((resolve, reject) => {
         Vote.findByIdAndUpdate(id, vote, (err, vote) => {
             
-            console.log(vote)
             if(!err){
                 utils.show(res, err, vote);
                 resolve(vote);
