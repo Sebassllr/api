@@ -5,8 +5,8 @@ const voteDao = require('../dao/VoteDAO')
 /**
  * Encargado de guardar un evento
  */
-exports.saveEvent = (newEvent, res) => {
-    return eventDao.saveEvent(newEvent, res);
+exports.saveEvent = (newEvent) => {
+    return eventDao.saveEvent(newEvent);
 }
 
 /**
@@ -66,7 +66,7 @@ exports.findEventById = eventId => {
  * Actualiza un evento por su ID
  */
 exports.updateEvent = (event) => {
-    eventDao.updateEvent(event._id, event);
+    return eventDao.updateEvent(event._id, event);
 }
 
 exports.findAllEventsByCategory = (category, res) => {
@@ -155,30 +155,22 @@ exports.getMaxVotes = event => {
         obj.category = 'Lugar';
         this.findCategoryByEventId(obj).then(places => {
             const place = getMaximunValues(places);
-            if(place){
-                characteristic.push(place);
-            }
+            characteristic.push(place);
             obj.category = 'Hora del evento';
             return this.findCategoryByEventId(obj);
         }).then(times => {
-            const time = getMaximunValues(times);
-            if(time){
-                characteristic.push(time);
-            }
+            const time = getMaximunValues(times);     
+            characteristic.push(time);
             obj.category = 'Fecha del evento';
             return this.findCategoryByEventId(obj);
         }).then(dates => {
             const date = getMaximunValues(dates);
-            if(date){
-                characteristic.push(date);
-            }
+            characteristic.push(date);
             obj.category = 'Regla';
             return this.findCategoryByEventId(obj);
         }).then(rules => {
             const rule = getRules(rules);
-            if(rule.length > 0){
-                characteristic.push({rules: rule});
-            }
+            characteristic.push({rules: rule});
             fullEvent.characteristics = characteristic;
             return fullEventDao.saveFullEvent(fullEvent);
         }).then(finalEvent => {

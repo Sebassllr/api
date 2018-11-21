@@ -45,10 +45,11 @@ exports.updateEvent = (id, event) => {
 /**
  * Guarda un evento propuesto
  */
-exports.saveEvent = (event, res) => {
+exports.saveEvent = (event) => {
     const toSaveEvent = new EventP({...event});
     return new Promise((resolve, reject) => {
         toSaveEvent.save((err, toSaveEvent) => {
+            console.log(err);
             if(!err){
                 console.log("El evento se ha guardado evento correctamente");
                 resolve(toSaveEvent); 

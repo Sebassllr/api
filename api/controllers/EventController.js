@@ -62,8 +62,34 @@ exports.findCharacteristicByEventId = (req, res) => {
  */
 exports.create = (req, res) => {
     const event = req.body;
-    eventService.saveEvent(event, res).then(event => {
+    eventService.saveEvent(event).then(event => {
+        console.log(event);
         res.send("El evento se ha guardado correctamente");
+    }).catch(err => {
+        console.log("Hubo un error");
+        console.log(err);
+        res.send(err)
+    });
+}
+
+exports.findAllFinalizeEvents = (req, res) => {
+    eventService.findAllEvents()
+    .then(array => {
+
+        const date = new Date();
+        const dates = [];
+        array.forEach((e, index) => {
+            e.characteristics.forEach(el => {
+                console.log(el);
+                if(el.category === "Fecha del evento" ){
+                    const newDate = new Date(el.value);
+                    if(newDate < date){
+                        dates.push(e);
+                    }
+                }
+            });
+        });
+        res.send(dates);
     }).catch(err => res.send(err));
 }
 
